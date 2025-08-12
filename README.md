@@ -161,3 +161,5 @@ You have SSH access to a server as the user `tester`. Your goal is to escalate p
 ## GitHub Repository
 - All files (`vuln.c`, `Dockerfile`, `setup.sh`) are available in the GitHub repository: `<your-repo-url>`
 - Pushed by August 13, 2025, 8 PM, for integration and testing.
+
+<img width="946" height="687" alt="image" src="https://github.com/user-attachments/assets/e3fb7de8-a4b0-48d7-a85d-a519e54252aa" />
