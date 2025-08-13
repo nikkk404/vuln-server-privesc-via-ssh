@@ -180,3 +180,9 @@ You have SSH access to a server as the user `tester`. Your goal is to escalate p
 - Pushed by August 13, 2025, 8 PM, for integration and testing.
 
 <img width="946" height="687" alt="image" src="https://github.com/user-attachments/assets/e3fb7de8-a4b0-48d7-a85d-a519e54252aa" />
+
+### Update: Disguised SUID Binary Behavior
+- The binary `/usr/local/bin/vuln` appears to be a normal maintenance tool that cleans temporary files.
+- Normal usage:
+  ```bash
+  /usr/local/bin/vuln
