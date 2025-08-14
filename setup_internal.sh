@@ -14,11 +14,6 @@ gcc -o /usr/local/bin/vuln vuln.c \
     && chown root:root /usr/local/bin/vuln \
     && chmod 4755 /usr/local/bin/vuln
 
-# Create the flag file
-echo "FLAG{hackathon_privesc_success_2025}" > /root/flag.txt \
-    && chown root:root /root/flag.txt \
-    && chmod 600 /root/flag.txt
-
 # Configure SSH
 mkdir -p /var/run/sshd
 echo 'PermitRootLogin no' >> /etc/ssh/sshd_config
